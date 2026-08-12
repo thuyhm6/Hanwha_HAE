@@ -4,3 +4,6 @@
 # Runtime-generated / temporary data (not source)
 WebRoot/resources/temp/
 WebRoot/resources/reportFile/
+
+# Build output (compiled classes / copied resources)
+WebRoot/WEB-INF/classes/

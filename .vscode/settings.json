@@ -8,5 +8,11 @@
     ],
     "java.configuration.updateBuildConfiguration": "automatic",
     "java.autobuild.enabled": true,
-    "java.debug.settings.onBuildFailureProceed": true
+    "java.debug.settings.onBuildFailureProceed": true,
+    "files.exclude": {
+        "**/WebRoot/WEB-INF/classes": true
+    },
+    "search.exclude": {
+        "**/WebRoot/WEB-INF/classes": true
+    }
 }
