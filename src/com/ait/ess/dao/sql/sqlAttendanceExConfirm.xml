@@ -1,0 +1,578 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sqlMap 
+	PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" 
+	"http://www.ibatis.com/dtd/sql-map-2.dtd">
+<sqlMap namespace="ess.attendanceConfirm">
+	<select id="viewAttendanceExList" parameterClass="linkMap" resultClass="linkMap" remapResults="true">
+		<![CDATA[
+			SELECT 
+			    EC.SEQ,
+		        EC.APPLY_NO,
+		        EC.PERSON_ID,
+		        EC.APPLY_REASON,
+		        EC.AFFIRM_FLAG,
+		        TO_CHAR(EC.APPLY_TIME,'DD-MM-YYYY') APPLY_TIME,
+		        get_global_name(EC.AFFIRM_FLAG,#interLanguage:VARCHAR#) AFFIRM_FLAG_NAME,
+		        get_global_name(get_ar_shiftno(EC.PERSON_ID,EC.AR_DATE_STR,#interCpnyID#),#interLanguage#) SHIFT_NAME,
+		        EC.ITEM_NO,
+		        get_global_name(EC.ITEM_NO,#interLanguage:VARCHAR#) ITEM_NAME,
+		        TO_CHAR(TO_DATE(REPLACE(EC.AR_DATE_STR,'/','-'),'YYYY-MM-DD'),'DD-MM-YYYY') AR_DATE_STR,
+		        TO_CHAR(EC.IN_TIME,'DD-MM-YYYY HH24:MI') IN_TIME,
+		        TO_CHAR(EC.OUT_TIME,'DD-MM-YYYY HH24:MI') OUT_TIME,
+		        TO_CHAR(EC.FROM_TIME,'DD-MM-YYYY HH24:MI') FROM_TIME,
+		        TO_CHAR(EC.TO_TIME,'DD-MM-YYYY HH24:MI') TO_TIME,
+		        EC.CONFIRM_FLAG,
+		        HR.LOCAL_NAME,
+		        HR.EMPID,
+		        HR.DEPTNO,
+		        get_dept_name(HR.DEPTNO,#interLanguage:VARCHAR#) DEPT_NAME,
+		        HR.POST_GRADE_NO,
+		        get_global_name(HR.POST_GRADE_NO,#interLanguage:VARCHAR#) POST_GRADE_NAME,
+		        HR.POST_FAMILY,
+		        get_global_name(HR.POST_FAMILY,#interLanguage:VARCHAR#) POST_FAMILY_NAME,
+		        EC.ACTIVITY,
+		        EC.HR_COMMENT,
+		        GET_UPDATED_INFO(EC.CONFIRM_BY) CONFIRM_BY,
+		        GET_AR_TIME_BY_CPNYID(EC.PERSON_ID,EC.AR_DATE_STR,'IN',#interCpnyID#) INDOOR_TIME,
+				GET_AR_TIME_BY_CPNYID(EC.PERSON_ID,EC.AR_DATE_STR,'OUT',#interCpnyID#) OUTDOOR_TIME
+		      FROM 
+		        ESS_CARD_APPLY_TB EC,HR_EMPLOYEE HR
+		      WHERE
+		        EC.PERSON_ID = HR.PERSON_ID
+		      AND EC.AFFIRM_FLAG = '14014308'
+		      AND EC.ACTIVITY = '1'
+		      AND HR.PERSON_ID NOT LIKE '111111%'
+		      AND EC.CPNY_ID = #interCpnyID#
+		]]>
+		<isNotEmpty prepend="AND" property="DEPTNO">
+			<![CDATA[
+		 		 EXISTS(
+		 		  	SELECT *
+					  FROM HR_DEPARTMENT
+				     WHERE HR_DEPARTMENT.DEPTNO = HR.DEPTNO AND HR_DEPARTMENT.ACTIVITY = 1
+					 START WITH (HR_DEPARTMENT.DEPTNO = #DEPTNO:VARCHAR# )
+					CONNECT BY PRIOR HR_DEPARTMENT.DEPTNO = HR_DEPARTMENT.PARENT_DEPT_NO
+		 		  )
+		    ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="KEY">
+			<![CDATA[
+				(CONVERTTOUNSIGN(UPPER(HR.EMPID)) LIKE CONVERTTOUNSIGN(UPPER('%$KEY$%'))
+				OR CONVERTTOUNSIGN(UPPER(HR.LOCAL_NAME)) LIKE CONVERTTOUNSIGN(UPPER('%$KEY$%'))
+				OR CONVERTTOUNSIGN(UPPER(HR.ENGLISH_NAME)) LIKE CONVERTTOUNSIGN(UPPER('%$KEY$%'))) 
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="POST_FAMILY">
+			<![CDATA[
+				HR.POST_FAMILY = #POST_FAMILY:VARCHAR#
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="EMP_OFFICE">
+			<![CDATA[
+				HR.EMP_OFFICE = #EMP_OFFICE:VARCHAR#
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="EMP_TYPE_CODE">
+			<![CDATA[
+				HR.EMP_TYPE_CODE = #EMP_TYPE_CODE:VARCHAR#
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="CONFIRM_FLAG">
+			<![CDATA[
+				EC.CONFIRM_FLAG = #CONFIRM_FLAG:VARCHAR#
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="START_DATE">
+					REPLACE(EC.AR_DATE_STR,'/','.') >= TO_CHAR(TO_DATE(#START_DATE:VARCHAR#,'DD.MM.YYYY'),'YYYY.MM.DD')
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="END_DATE">
+					TO_CHAR(TO_DATE(#END_DATE:VARCHAR#,'DD.MM.YYYY'),'YYYY.MM.DD') >= REPLACE(EC.AR_DATE_STR,'/','.')
+		</isNotEmpty>
+		<![CDATA[
+			ORDER BY EC.AR_DATE_STR DESC
+		]]>
+	</select>
+	<procedure id="attendanceExConfirm" parameterClass="linkMap">
+		<![CDATA[
+			{call PKG_AFFIRM_EMAIL.PR_ATTENDANCEEX_CONFIRM(
+						#SEQ:VARCHAR#,
+						#FLAG:VARCHAR#,
+						#adminID:VARCHAR#,
+						#adminIP:VARCHAR#,
+						#interCpnyID:VARCHAR#,
+						#message,jdbcType=VARCHAR,mode=OUT#) }
+		]]>
+	</procedure>
+	<update id="attendanceExHrComentConfirm" parameterClass="linkMap">
+		<![CDATA[
+			UPDATE ESS_CARD_APPLY_TB SET HR_COMMENT = #HR_COMMENT:VARCHAR# WHERE APPLY_NO = #SEQ:VARCHAR#
+		]]>
+	</update>
+	<select id="viewPOtApplyInfoConfirmList" parameterClass="linkMap" resultClass="linkMap" remapResults="true">
+		<![CDATA[
+			SELECT 
+				   ESS.APPLY_NO,
+		      	   ESS.PERSON_ID,
+		      	   ESS.APPLY_DATE_TIME,
+			       ESS.APPLY_TIME,
+			       ESS.OT_TYPE_CODE,
+			       ESS.OT_TYPE_CODE_NAME,
+			       ESS.OT_APPLY_HOUR,
+			       ESS.APPLY_OT_DATE,
+			       ESS.FROM_DATE,
+				   ESS.TO_DATE,
+			       ESS.OT_FROM_TIME,
+			       ESS.OT_TO_TIME,
+			       ESS.ACTIVITY,
+			       ESS.CONFIRM_FLAG,
+			       ESS.APPLY_OT_REMARK,
+			       ESS.LOCAL_NAME,
+			       ESS.EMPID,
+			       ESS.DEPTNO,
+			       ESS.EMP_OFFICE,
+			       ESS.OT_OVER,
+			       ESS.DEPT_NAME,
+			       ESS.POST_GRADE_NO,
+			       ESS.POST_GRADE_NAME,
+			       ESS.POST_FAMILY,
+			       ESS.POST_FAMILY_NAME,
+			       ESS.CONFIRM_BY,
+			       ESS.OT_TOTAIL
+		      FROM (SELECT 
+					   OT.APPLY_NO,
+					   OT.PERSON_ID,
+					   OT.APPLY_TIME APPLY_DATE_TIME,
+					   TO_CHAR(OT.APPLY_TIME,'DD/MM/YYYY') APPLY_TIME,
+					   OT.OT_TYPE_CODE,
+					   get_global_name(OT.OT_TYPE_CODE,#interLanguage:VARCHAR#) OT_TYPE_CODE_NAME,
+					   OT.OT_APPLY_HOUR,
+					   TO_CHAR(OT.APPLY_OT_DATE,'DD/MM/YYYY') APPLY_OT_DATE,
+					   TO_CHAR(OT.OT_FROM_TIME,'DD/MM/YYYY HH24:MI')  FROM_DATE,
+					   TO_CHAR(OT.OT_TO_TIME,'DD/MM/YYYY HH24:MI')  TO_DATE,
+					   TO_CHAR(OT.OT_FROM_TIME,'HH24:MI') OT_FROM_TIME,
+					   TO_CHAR(OT.OT_TO_TIME,'HH24:MI') OT_TO_TIME,
+					   OT.ACTIVITY,
+					   OT.CONFIRM_FLAG,
+					   OT.APPLY_OT_REMARK,
+					   HR.LOCAL_NAME,
+					   HR.EMPID,
+					   HR.DEPTNO,
+					   HR.EMP_OFFICE,
+					   '0' OT_OVER,
+					   get_dept_name(HR.DEPTNO, #interLanguage:VARCHAR#) DEPT_NAME,
+					   HR.POST_GRADE_NO,
+					   get_global_name(HR.POST_GRADE_NO, #interLanguage:VARCHAR#) POST_GRADE_NAME,
+					   HR.POST_FAMILY,
+					   get_global_name(HR.POST_FAMILY,#interLanguage:VARCHAR#) POST_FAMILY_NAME,
+					   GET_UPDATED_INFO(OT.CONFIRM_BY) CONFIRM_BY,
+					   GET_AR_OT_TOTAIL(TO_CHAR(OT.APPLY_OT_DATE,'YYYY/MM/DD'),#interCpnyID#,OT.PERSON_ID,'30')  OT_TOTAIL
+					FROM 
+					ESS_APPLY_OT OT,HR_EMPLOYEE HR
+					WHERE
+					OT.PERSON_ID = HR.PERSON_ID
+					AND  OT.AFFIRM_FLAG = 14014308
+					AND OT.ACTIVITY = '1'
+					AND OT.PERSON_ID NOT LIKE '111111%'
+					AND OT.CPNY_ID = #interCpnyID#
+					
+					UNION ALL
+					
+					SELECT 
+					   OTO.APPLY_NO,
+					   OTO.PERSON_ID,
+					   OTO.APPLY_TIME APPLY_DATE_TIME,
+					   TO_CHAR(OTO.APPLY_TIME,'DD/MM/YYYY') APPLY_TIME,
+					   OTO.OT_TYPE_CODE,
+					   '(OT Over) ' || get_global_name(OTO.OT_TYPE_CODE,#interLanguage:VARCHAR#) OT_TYPE_CODE_NAME,
+					   OTO.OT_APPLY_HOUR,
+					   TO_CHAR(OTO.APPLY_OT_DATE,'DD/MM/YYYY') APPLY_OT_DATE,
+					   TO_CHAR(OTO.OT_FROM_TIME,'DD/MM/YYYY HH24:MI') FROM_DATE,
+					   TO_CHAR(OTO.OT_TO_TIME,'DD/MM/YYYY HH24:MI') TO_DATE,
+					   TO_CHAR(OTO.OT_FROM_TIME,'HH24:MI') OT_FROM_TIME,
+					   TO_CHAR(OTO.OT_TO_TIME,'HH24:MI') OT_TO_TIME,
+					   OTO.ACTIVITY,
+					   OTO.CONFIRM_FLAG,
+					   OTO.APPLY_OT_REMARK,
+					   HR.LOCAL_NAME,
+					   HR.EMPID,
+					   HR.DEPTNO,
+					   HR.EMP_OFFICE,
+					   '1' OT_OVER,
+					   get_dept_name(HR.DEPTNO, #interLanguage:VARCHAR#) DEPT_NAME,
+					   HR.POST_GRADE_NO,
+					   get_global_name(HR.POST_GRADE_NO, #interLanguage:VARCHAR#) POST_GRADE_NAME,
+					   HR.POST_FAMILY,
+					   get_global_name(HR.POST_FAMILY,#interLanguage:VARCHAR#) POST_FAMILY_NAME,
+					   GET_UPDATED_INFO(OTO.CONFIRM_BY) CONFIRM_BY,
+					   GET_AR_OT_TOTAIL(TO_CHAR(OTO.APPLY_OT_DATE,'YYYY/MM/DD'),#interCpnyID#,OTO.PERSON_ID,'301')  OT_TOTAIL
+					FROM 
+					ESS_APPLY_OT_OVER OTO,HR_EMPLOYEE HR
+					WHERE
+					OTO.PERSON_ID = HR.PERSON_ID
+					AND  OTO.AFFIRM_FLAG = 14014308
+					AND OTO.ACTIVITY = '1'
+					AND OTO.PERSON_ID NOT LIKE '111111%'
+					AND OTO.CPNY_ID = #interCpnyID#) ESS
+		        WHERE 1 = 1
+		]]>
+		<isNotEmpty prepend="AND" property="DEPTNO">
+			<![CDATA[
+		 		 EXISTS(
+		 		  	SELECT *
+					  FROM HR_DEPARTMENT
+				     WHERE HR_DEPARTMENT.DEPTNO = ESS.DEPTNO AND HR_DEPARTMENT.ACTIVITY = 1
+					 START WITH (HR_DEPARTMENT.DEPTNO = #DEPTNO:VARCHAR# )
+					CONNECT BY PRIOR HR_DEPARTMENT.DEPTNO = HR_DEPARTMENT.PARENT_DEPT_NO
+		 		  )
+		    ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="KEY">
+			<![CDATA[
+				(CONVERTTOUNSIGN(UPPER(ESS.EMPID)) LIKE CONVERTTOUNSIGN(UPPER('%$KEY$%'))
+				OR CONVERTTOUNSIGN(UPPER(ESS.LOCAL_NAME)) LIKE CONVERTTOUNSIGN(UPPER('%$KEY$%'))) 
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="CONFIRM_FLAG">
+			<![CDATA[
+				ESS.CONFIRM_FLAG = #CONFIRM_FLAG:VARCHAR#
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="OT_OVER">
+			<![CDATA[
+				ESS.OT_OVER = #OT_OVER:VARCHAR#
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="APPLY_TYPE_CODE_NEW">
+			<![CDATA[
+				ESS.OT_TYPE_CODE = #APPLY_TYPE_CODE_NEW:VARCHAR#
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="EMP_OFFICE">
+			<![CDATA[
+				ESS.EMP_OFFICE = #EMP_OFFICE:VARCHAR#
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="START_DATE">
+			<![CDATA[
+				TO_CHAR(ESS.APPLY_DATE_TIME,'YYYY-MM-DD') >= REPLACE(#START_DATE:VARCHAR#,'.','-')
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="END_DATE">
+			<![CDATA[
+				TO_CHAR(ESS.APPLY_DATE_TIME,'YYYY-MM-DD') <= REPLACE(#END_DATE:VARCHAR#,'.','-')
+			]]>
+		</isNotEmpty>
+		<![CDATA[
+			ORDER BY ESS.APPLY_DATE_TIME DESC
+		]]>
+	</select>
+	
+	<procedure id="pOtApplyInfoConfirm" parameterClass="linkMap">
+		<![CDATA[
+			{call PKG_AFFIRM_EMAIL.PR_OT_CONFIRM(
+						#APPLY_NO:VARCHAR#,
+						#FLAG:VARCHAR#,
+						#adminID:VARCHAR#,
+						#adminIP:VARCHAR#,
+						#message,jdbcType=VARCHAR,mode=OUT#) }
+		]]>
+	</procedure>
+	
+	<select id="viewLeaveConfirmList" parameterClass="linkMap" resultClass="linkMap" remapResults="true">
+		<![CDATA[
+			SELECT 
+		     	   EL.APPLY_NO,
+			       TO_CHAR(EL.APPLY_TIME,'DD-MM-YYYY') APPLY_TIME,
+				   EL.PERSON_ID,
+				   AR_GET_DAY_HOURS(EL.PERSON_ID,TO_CHAR(EL.LEAVE_FROM_TIME,'YYYY/MM/DD')) DAY_HOURS,
+				   TO_CHAR(EL.LEAVE_FROM_TIME,'DD-MM-YYYY HH24:MI') LEAVE_FROM_TIME,
+				   TO_CHAR(EL.LEAVE_TO_TIME,'DD-MM-YYYY HH24:MI') LEAVE_TO_TIME,
+				   trunc(EL.LEAVE_TO_TIME - SYSDATE) OVER_DAY,
+				   trunc(((EL.LEAVE_TO_TIME - SYSDATE)-trunc(LEAVE_TO_TIME - SYSDATE))*24) OVER_HOUR,
+				   EL.LEAVE_REASON,
+				   EL.LEAVE_TYPE_CODE,
+				   get_global_name(EL.LEAVE_TYPE_CODE,#interLanguage:VARCHAR#) LEAVE_TYPE_CODE_NAME,
+				   AR_GET_VAC_FOR_ESS(TO_CHAR(EL.LEAVE_FROM_TIME,'YYYY/MM/DD'),#interCpnyID:VARCHAR#,EL.PERSON_ID,'3') SHENGYU_VAC_CNT,
+				   EL.APPLY_LENGTH,
+				   EL.CONFIRM_FLAG,
+				   EL.ACTIVITY,
+				   EL.CREATED_BY,
+				   get_local_name_by_personid(EL.CREATED_BY,#interCpnyID#) CREATED_NAME,
+			       HR.LOCAL_NAME,
+			       HR.DEPTNO,
+			       HR.EMPID,
+			       get_dept_name(HR.DEPTNO, #interLanguage:VARCHAR#) DEPT_NAME,
+			       HR.POST_GRADE_NO,
+			       get_global_name(HR.POST_GRADE_NO, #interLanguage:VARCHAR#) POST_GRADE_NAME,
+			       HR.POST_FAMILY,
+			        get_global_name(HR.POST_FAMILY,#interLanguage:VARCHAR#) POST_FAMILY_NAME,
+			        GET_UPDATED_INFO(EL.CONFIRM_BY) CONFIRM_BY
+		      FROM 
+		        ess_leave_apply_tb EL,HR_EMPLOYEE HR
+		      WHERE
+		        EL.PERSON_ID = HR.PERSON_ID
+		      AND EL.AFFIRM_FLAG = 14014308
+		      AND EL.PERSON_ID NOT LIKE '111111%'
+		      AND EL.ACTIVITY = '1'
+		      AND EL.CPNY_ID = #interCpnyID#
+		]]>
+		<isNotEmpty prepend="AND" property="DEPTNO">
+			<![CDATA[
+		 		 EXISTS(
+		 		  	SELECT *
+					  FROM HR_DEPARTMENT
+				     WHERE HR_DEPARTMENT.DEPTNO = HR.DEPTNO AND HR_DEPARTMENT.ACTIVITY = 1
+					 START WITH (HR_DEPARTMENT.DEPTNO = #DEPTNO:VARCHAR# )
+					CONNECT BY PRIOR HR_DEPARTMENT.DEPTNO = HR_DEPARTMENT.PARENT_DEPT_NO
+		 		  )
+		    ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="KEY">
+			<![CDATA[
+				(CONVERTTOUNSIGN(UPPER(HR.EMPID)) LIKE CONVERTTOUNSIGN(UPPER('%$KEY$%'))
+				OR CONVERTTOUNSIGN(UPPER(HR.LOCAL_NAME)) LIKE CONVERTTOUNSIGN(UPPER('%$KEY$%'))
+				OR CONVERTTOUNSIGN(UPPER(HR.ENGLISH_NAME)) LIKE CONVERTTOUNSIGN(UPPER('%$KEY$%'))) 
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="APPLY_TYPE_CODE">
+			<![CDATA[
+				EL.LEAVE_TYPE_CODE = #APPLY_TYPE_CODE:VARCHAR#
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="CONFIRM_FLAG">
+			<![CDATA[
+				EL.CONFIRM_FLAG = #CONFIRM_FLAG:VARCHAR#
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="EMP_OFFICE">
+			<![CDATA[
+				HR.EMP_OFFICE = #EMP_OFFICE:VARCHAR#
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="EMP_TYPE_CODE">
+			<![CDATA[
+				HR.EMP_TYPE_CODE = #EMP_TYPE_CODE:VARCHAR#
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="START_DATE">
+			<isNotEmpty property="END_DATE">
+				<![CDATA[
+		((TO_CHAR(EL.LEAVE_FROM_TIME,'yyyy.MM.dd') >=  TO_CHAR(TO_DATE(#START_DATE:VARCHAR#,'DD.MM.YYYY'),'YYYY.MM.DD') AND TO_CHAR(EL.LEAVE_FROM_TIME,'yyyy.MM.dd') <= TO_CHAR(TO_DATE(#END_DATE:VARCHAR#,'DD.MM.YYYY'),'YYYY.MM.DD')) OR  
+         (TO_CHAR(EL.LEAVE_FROM_TIME,'yyyy.MM.dd') <= TO_CHAR(TO_DATE(#START_DATE:VARCHAR#,'DD.MM.YYYY'),'YYYY.MM.DD') AND TO_CHAR(EL.LEAVE_TO_TIME,'yyyy.MM.dd') >= TO_CHAR(TO_DATE(#END_DATE:VARCHAR#,'DD.MM.YYYY'),'YYYY.MM.DD')) OR  
+         (TO_CHAR(EL.LEAVE_TO_TIME,'yyyy.MM.dd') >= TO_CHAR(TO_DATE(#START_DATE:VARCHAR#,'DD.MM.YYYY'),'YYYY.MM.DD') AND TO_CHAR(EL.LEAVE_TO_TIME,'yyyy.MM.dd') <= TO_CHAR(TO_DATE(#END_DATE:VARCHAR#,'DD.MM.YYYY'),'YYYY.MM.DD')))
+				]]>
+			</isNotEmpty>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="START_DATE">
+			<isEmpty property="END_DATE">
+				<![CDATA[
+					(TO_CHAR(TO_DATE(#START_DATE:VARCHAR#,'DD.MM.YYYY'),'YYYY.MM.DD') <= TO_CHAR(EL.LEAVE_FROM_TIME,'yyyy.MM.dd') OR TO_CHAR(TO_DATE(#START_DATE:VARCHAR#,'DD.MM.YYYY'),'YYYY.MM.DD') <= TO_CHAR(EL.LEAVE_TO_TIME,'yyyy.MM.dd'))
+				]]>
+			</isEmpty>
+		</isNotEmpty>
+		<isNotEmpty  prepend="AND"  property="END_DATE">
+			<isEmpty property="START_DATE">
+				<![CDATA[
+       				(TO_CHAR(TO_DATE(#END_DATE:VARCHAR#,'DD.MM.YYYY'),'YYYY.MM.DD') >= TO_CHAR(EL.LEAVE_FROM_TIME,'yyyy.MM.dd') OR TO_CHAR(TO_DATE(#END_DATE:VARCHAR#,'DD.MM.YYYY'),'YYYY.MM.DD') >= TO_CHAR(EL.LEAVE_TO_TIME,'yyyy.MM.dd'))
+				]]>
+			</isEmpty>
+		</isNotEmpty>
+		<![CDATA[
+			ORDER BY EL.APPLY_TIME DESC
+		]]>
+	</select>
+	
+	<select id="viewSickLeaveProofConfirmList" parameterClass="linkMap" resultClass="linkMap" remapResults="true">
+		<![CDATA[
+			SELECT EL.APPLY_NO,
+			       TO_CHAR(EL.APPLY_TIME, 'DD-MM-YYYY') APPLY_TIME,
+			       EL.PERSON_ID,
+			       AR_GET_DAY_HOURS(EL.PERSON_ID,
+			                        TO_CHAR(EL.LEAVE_FROM_TIME, 'YYYY/MM/DD')) DAY_HOURS,
+			       TO_CHAR(EL.LEAVE_FROM_TIME, 'DD-MM-YYYY HH24:MI') LEAVE_FROM_TIME,
+			       TO_CHAR(EL.LEAVE_TO_TIME, 'DD-MM-YYYY HH24:MI') LEAVE_TO_TIME,
+			       trunc(EL.LEAVE_TO_TIME - SYSDATE) OVER_DAY,
+			       trunc(((EL.LEAVE_TO_TIME - SYSDATE) - trunc(LEAVE_TO_TIME - SYSDATE)) * 24) OVER_HOUR,
+			       EL.LEAVE_REASON,
+			       EL.LEAVE_TYPE_CODE,
+			       get_global_name(EL.LEAVE_TYPE_CODE, #interLanguage:VARCHAR#) LEAVE_TYPE_CODE_NAME,
+			       EL.APPLY_LENGTH,
+			       EL.CONFIRM_FLAG,
+			       EL.ACTIVITY,
+			       EL.CREATED_BY,
+			       get_local_name_by_personid(EL.CREATED_BY, #interCpnyID#) CREATED_NAME,
+			       HR.LOCAL_NAME,
+			       HR.DEPTNO,
+			       HR.EMPID,
+			       get_dept_name(HR.DEPTNO, #interLanguage:VARCHAR#) DEPT_NAME,
+			       HR.POST_GRADE_NO,
+			       get_global_name(HR.POST_GRADE_NO, #interLanguage:VARCHAR#) POST_GRADE_NAME,
+			       HR.POST_FAMILY,
+			       get_global_name(HR.POST_FAMILY, #interLanguage:VARCHAR#) POST_FAMILY_NAME,
+			       GET_UPDATED_INFO(EL.CONFIRM_BY) CONFIRM_BY,
+			       EL.PROOF_YN
+			  FROM ess_leave_apply_tb EL, HR_EMPLOYEE HR
+			 WHERE EL.PERSON_ID = HR.PERSON_ID
+			   AND EL.AFFIRM_FLAG NOT IN ('14014309','14014310')
+			   AND EL.PERSON_ID NOT LIKE '111111%'
+			   AND EL.LEAVE_TYPE_CODE IN ('15821','14015956','14013816','27','28','482')
+			   AND EL.APPLY_TIME >= TO_DATE('01/06/2023','DD/MM/YYYY')
+			   AND EL.ACTIVITY = '1'
+			   AND EL.CONFIRM_FLAG <> '2'
+			   AND EL.CPNY_ID = #interCpnyID#
+		]]>
+		<isNotEmpty prepend="AND" property="DEPTNO">
+			<![CDATA[
+		 		 EXISTS(
+		 		  	SELECT *
+					  FROM HR_DEPARTMENT
+				     WHERE HR_DEPARTMENT.DEPTNO = HR.DEPTNO AND HR_DEPARTMENT.ACTIVITY = 1
+					 START WITH (HR_DEPARTMENT.DEPTNO = #DEPTNO:VARCHAR# )
+					CONNECT BY PRIOR HR_DEPARTMENT.DEPTNO = HR_DEPARTMENT.PARENT_DEPT_NO
+		 		  )
+		    ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="KEY">
+			<![CDATA[
+				(CONVERTTOUNSIGN(UPPER(HR.EMPID)) LIKE CONVERTTOUNSIGN(UPPER('%$KEY$%'))
+				OR CONVERTTOUNSIGN(UPPER(HR.LOCAL_NAME)) LIKE CONVERTTOUNSIGN(UPPER('%$KEY$%'))
+				OR CONVERTTOUNSIGN(UPPER(HR.ENGLISH_NAME)) LIKE CONVERTTOUNSIGN(UPPER('%$KEY$%'))) 
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="APPLY_TYPE_CODE">
+			<![CDATA[
+				EL.LEAVE_TYPE_CODE = #APPLY_TYPE_CODE:VARCHAR#
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="PROOF_YN">
+			<![CDATA[
+				EL.PROOF_YN = #PROOF_YN:VARCHAR#
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="EMP_OFFICE">
+			<![CDATA[
+				HR.EMP_OFFICE = #EMP_OFFICE:VARCHAR#
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="EMP_TYPE_CODE">
+			<![CDATA[
+				HR.EMP_TYPE_CODE = #EMP_TYPE_CODE:VARCHAR#
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="START_DATE">
+			<isNotEmpty property="END_DATE">
+				<![CDATA[
+		((TO_CHAR(EL.LEAVE_FROM_TIME,'yyyy.MM.dd') >=  TO_CHAR(TO_DATE(#START_DATE:VARCHAR#,'DD.MM.YYYY'),'YYYY.MM.DD') AND TO_CHAR(EL.LEAVE_FROM_TIME,'yyyy.MM.dd') <= TO_CHAR(TO_DATE(#END_DATE:VARCHAR#,'DD.MM.YYYY'),'YYYY.MM.DD')) OR  
+         (TO_CHAR(EL.LEAVE_FROM_TIME,'yyyy.MM.dd') <= TO_CHAR(TO_DATE(#START_DATE:VARCHAR#,'DD.MM.YYYY'),'YYYY.MM.DD') AND TO_CHAR(EL.LEAVE_TO_TIME,'yyyy.MM.dd') >= TO_CHAR(TO_DATE(#END_DATE:VARCHAR#,'DD.MM.YYYY'),'YYYY.MM.DD')) OR  
+         (TO_CHAR(EL.LEAVE_TO_TIME,'yyyy.MM.dd') >= TO_CHAR(TO_DATE(#START_DATE:VARCHAR#,'DD.MM.YYYY'),'YYYY.MM.DD') AND TO_CHAR(EL.LEAVE_TO_TIME,'yyyy.MM.dd') <= TO_CHAR(TO_DATE(#END_DATE:VARCHAR#,'DD.MM.YYYY'),'YYYY.MM.DD')))
+				]]>
+			</isNotEmpty>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="START_DATE">
+			<isEmpty property="END_DATE">
+				<![CDATA[
+					(TO_CHAR(TO_DATE(#START_DATE:VARCHAR#,'DD.MM.YYYY'),'YYYY.MM.DD') <= TO_CHAR(EL.LEAVE_FROM_TIME,'yyyy.MM.dd') OR TO_CHAR(TO_DATE(#START_DATE:VARCHAR#,'DD.MM.YYYY'),'YYYY.MM.DD') <= TO_CHAR(EL.LEAVE_TO_TIME,'yyyy.MM.dd'))
+				]]>
+			</isEmpty>
+		</isNotEmpty>
+		<isNotEmpty  prepend="AND"  property="END_DATE">
+			<isEmpty property="START_DATE">
+				<![CDATA[
+       				(TO_CHAR(TO_DATE(#END_DATE:VARCHAR#,'DD.MM.YYYY'),'YYYY.MM.DD') >= TO_CHAR(EL.LEAVE_FROM_TIME,'yyyy.MM.dd') OR TO_CHAR(TO_DATE(#END_DATE:VARCHAR#,'DD.MM.YYYY'),'YYYY.MM.DD') >= TO_CHAR(EL.LEAVE_TO_TIME,'yyyy.MM.dd'))
+				]]>
+			</isEmpty>
+		</isNotEmpty>
+		<![CDATA[
+			ORDER BY EL.APPLY_TIME DESC
+		]]>
+	</select>
+	
+	<select id="viewVacConfirmList" parameterClass="linkMap" resultClass="linkMap" remapResults="true">
+	<![CDATA[
+		SELECT A.APPLY_NO,
+		       A.PERSON_ID,
+		       HR.LOCAL_NAME,
+		       HR.EMPID,
+		       GET_DEPT_NAME(HR.DEPTNO,#interLanguage:VARCHAR#) DEPT_NAME,
+		       A.CPNY_ID,
+		       A.VAC_ID,
+		       A.TOT_VAC_CNT,
+		       A.REMARK,
+		       A.CREATE_DATE,
+		       A.CREATED_BY,
+		       A.CREATED_IP,
+		       A.UPDATE_DATE,
+		       A.UPDATED_BY,
+		       A.UPDATED_IP,
+		       A.ACTIVITY,
+		       A.CONFIRM_FLAG,
+		       TO_CHAR(A.STRT_DATE, 'YYYY.MM.DD') STRT_DATE,
+		       TO_CHAR(A.END_DATE, 'YYYY.MM.DD') END_DATE
+		   FROM AR_VAC_EMP_APPLY A, HR_EMPLOYEE HR
+		   WHERE A.PERSON_ID = HR.PERSON_ID 
+		   AND EMPID NOT LIKE '111111%'
+		   
+	]]>
+		<isNotEmpty prepend="AND" property="DEPTNO">
+			<![CDATA[
+		 		 EXISTS(
+		 		  	SELECT *
+					  FROM HR_DEPARTMENT
+				     WHERE HR_DEPARTMENT.DEPTNO = HR.DEPTNO AND HR_DEPARTMENT.ACTIVITY = 1
+					 START WITH (HR_DEPARTMENT.DEPTNO = #DEPTNO:VARCHAR# )
+					CONNECT BY PRIOR HR_DEPARTMENT.DEPTNO = HR_DEPARTMENT.PARENT_DEPT_NO
+		 		  )
+		    ]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="KEY">
+			<![CDATA[
+				(CONVERTTOUNSIGN(UPPER(HR.EMPID)) LIKE CONVERTTOUNSIGN(UPPER('%$KEY$%'))
+				OR CONVERTTOUNSIGN(UPPER(HR.LOCAL_NAME)) LIKE CONVERTTOUNSIGN(UPPER('%$KEY$%'))
+				OR CONVERTTOUNSIGN(UPPER(HR.ENGLISH_NAME)) LIKE CONVERTTOUNSIGN(UPPER('%$KEY$%'))) 
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="CONFIRM_FLAG">
+			<![CDATA[
+				A.CONFIRM_FLAG = #CONFIRM_FLAG:VARCHAR#
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="VAR_YEAR">
+			<![CDATA[
+				  TO_DATE(#VAR_YEAR#,'YYYY.MM.DD') BETWEEN A.STRT_DATE AND A.END_DATE
+			]]>
+		</isNotEmpty>
+	</select>
+	
+	<update id="sickLeaveProofConfirm" parameterClass="linkMap" >
+	    <![CDATA[  
+	        UPDATE ESS_LEAVE_APPLY_TB TB
+			   SET TB.PROOF_YN = #FLAG:VARCHAR#,
+			       TB.PROOF_CONFIRM_DATE = SYSDATE,
+			       TB.PROOF_CONFIRM_BY = #adminID:VARCHAR#,
+			       TB.PROOF_CONFIRM_IP = #adminIP:VARCHAR#       
+			 WHERE TB.APPLY_NO = #APPLY_NO:VARCHAR#
+	    ]]>
+	</update>
+	
+	<procedure id="leaveConfirm" parameterClass="linkMap">
+		<![CDATA[
+			{call PKG_AFFIRM_EMAIL.PR_LEAVE_CONFIRM(
+						#APPLY_NO:VARCHAR#,	
+						#FLAG:VARCHAR#,
+						#adminID:VARCHAR#,
+						#adminIP:VARCHAR#,
+						#message,jdbcType=VARCHAR,mode=OUT#) }
+		]]>
+	</procedure>
+	
+	<procedure id="vacConfirm" parameterClass="linkMap">
+		<![CDATA[
+			{call PKG_AFFIRM_EMAIL.PR_VAC_CONFIRM(
+						#APPLY_NO:VARCHAR#,	
+						#FLAG:VARCHAR#,
+						#adminID:VARCHAR#,
+						#adminIP:VARCHAR#,
+						#message,jdbcType=VARCHAR,mode=OUT#) }
+		]]>
+	</procedure>
+</sqlMap>

@@ -1,0 +1,29 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Launch Tomcat (Hanwha_HAE) - log in Debug Console",
+            "request": "launch",
+            "preLaunchTask": "Compile: javac (WEB-INF/classes)",
+            "mainClass": "org.apache.catalina.startup.Bootstrap",
+            "args": "start",
+            "cwd": "D:\\Java\\apache-tomcat\\bin",
+            "classPaths": [
+                "D:\\Java\\apache-tomcat\\bin\\bootstrap.jar"
+            ],
+            "vmArgs": "-Xms512m -Xmx1024m -Dfile.encoding=UTF-8 -Dcatalina.base=\"D:\\Java\\apache-tomcat\" -Dcatalina.home=\"D:\\Java\\apache-tomcat\" -Djava.io.tmpdir=\"D:\\Java\\apache-tomcat\\temp\" -Djava.util.logging.config.file=\"D:\\Java\\apache-tomcat\\conf\\logging.properties\" -Djava.util.logging.manager=org.apache.juli.ClassLoaderLogManager",
+            "projectName": "HANWHA_HAE",
+            "console": "internalConsole",
+            "stopOnEntry": false
+        },
+        {
+            "type": "java",
+            "name": "Attach to Tomcat (Hanwha_HAE)",
+            "request": "attach",
+            "hostName": "localhost",
+            "port": 8000,
+            "projectName": "HANWHA_HAE"
+        }
+    ]
+}

@@ -1,0 +1,418 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "sql-map-2.dtd" >
+<sqlMap namespace="sys.notice">
+	<select id="getNoticeInfo" parameterClass="linkMap" resultClass="linkMap">
+		<![CDATA[
+			SELECT T.ID, T.TITLE, T.CONTENT, T.ORDERNO, to_char(T.FROM_DATE,'DD/MM/YYYY') FROM_DATE, to_char(T.TO_DATE,'DD/MM/YYYY') TO_DATE,T.CPNY_ID,T.COLOR_FLAG
+			  FROM NOTICE_INFO T
+			 WHERE T.ACTIVITY = '1'
+		]]>
+		<isNotEmpty prepend="AND" property="FROM_DATE">
+			<![CDATA[
+				T.FROM_DATE > TO_DATE(#FROM_DATE:VARCHAR#,'DD/MM/YYYY')
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="TO_DATE">
+			<![CDATA[
+				T.TO_DATE < TO_DATE(#TO_DATE:VARCHAR#,'DD/MM/YYYY')
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="TITLE">
+			<![CDATA[
+				upper(T.TITLE) like upper('%$TITLE$%')
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="CONTENT">
+			<![CDATA[
+				upper(T.CONTENT) like upper('%$CONTENT$%')
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="CPNY_ID">
+			<![CDATA[
+				T.CPNY_ID like '%$CPNY_ID$%'
+			]]>
+		</isNotEmpty>
+		ORDER BY CREATE_DATE DESC
+	</select>
+	<select id="getNoticeInfo1" parameterClass="linkMap" resultClass="linkMap">
+		<![CDATA[
+			SELECT T.ID, T.TITLE, T.CONTENT, T.ORDERNO, to_char(T.FROM_DATE,'DD/MM/YYYY') FROM_DATE, to_char(T.TO_DATE,'DD/MM/YYYY') TO_DATE,T.CPNY_ID,T.COLOR_FLAG
+			  FROM NOTICE_INFO T
+			 WHERE 1=1
+		]]>
+		<isNotEmpty prepend="AND" property="FROM_DATE">
+			<![CDATA[
+				T.FROM_DATE > TO_DATE(#FROM_DATE:VARCHAR#,'DD/MM/YYYY')
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="TO_DATE">
+			<![CDATA[
+				T.TO_DATE < TO_DATE(#TO_DATE:VARCHAR#,'DD/MM/YYYY')
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="TITLE">
+			<![CDATA[
+				upper(T.TITLE) like upper('%$TITLE$%')
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="CONTENT">
+			<![CDATA[
+				upper(T.CONTENT) like upper('%$CONTENT$%')
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="CPNY_ID">
+			<![CDATA[
+				T.CPNY_ID like '%$CPNY_ID$%'
+			]]>
+		</isNotEmpty>
+		ORDER BY CREATE_DATE DESC
+	</select>
+	<select id="getNoticeInfoCn" parameterClass="linkMap" resultClass="int">
+		<![CDATA[
+			SELECT COUNT(*)
+			  FROM NOTICE_INFO T
+			 WHERE T.CPNY_ID = #interCpnyID#
+			 AND T.ACTIVITY = '1'
+		]]>
+		<isNotEmpty prepend="AND" property="FROM_DATE">
+			<![CDATA[
+				T.FROM_DATE > TO_DATE(#FROM_DATE:VARCHAR#,'DD/MM/YYYY')
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="TO_DATE">
+			<![CDATA[
+				T.TO_DATE < TO_DATE(#TO_DATE:VARCHAR#,'DD/MM/YYYY')
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="TITLE">
+			<![CDATA[
+				upper(T.TITLE) like upper('%$TITLE$%')
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="CONTENT">
+			<![CDATA[
+				upper(T.CONTENT) like upper('%$CONTENT$%')
+			]]>
+		</isNotEmpty>
+	</select>
+	
+	<select id="getNoticeInfoCn1" parameterClass="linkMap" resultClass="int">
+		<![CDATA[
+			SELECT COUNT(*)
+			  FROM NOTICE_INFO T
+			 WHERE T.CPNY_ID = #interCpnyID#
+		]]>
+		<isNotEmpty prepend="AND" property="FROM_DATE">
+			<![CDATA[
+				T.FROM_DATE > TO_DATE(#FROM_DATE:VARCHAR#,'DD/MM/YYYY')
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="TO_DATE">
+			<![CDATA[
+				T.TO_DATE < TO_DATE(#TO_DATE:VARCHAR#,'DD/MM/YYYY')
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="TITLE">
+			<![CDATA[
+				upper(T.TITLE) like upper('%$TITLE$%')
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="CONTENT">
+			<![CDATA[
+				upper(T.CONTENT) like upper('%$CONTENT$%')
+			]]>
+		</isNotEmpty>
+	</select>
+	<select id="getNoticeInfoById" parameterClass="linkMap" resultClass="linkMap">
+		<![CDATA[
+			SELECT T.ID, T.TITLE, T.CONTENT, T.ORDERNO, to_char(T.FROM_DATE,'dd/mm/yyyy') FROM_DATE, to_char(T.TO_DATE,'dd/mm/yyyy') TO_DATE,T.CPNY_ID,
+			T.FILE_NAME,T.FILE_URL,T.CREATED_BY,T.COLOR_FLAG
+			  FROM NOTICE_INFO T
+			 WHERE T.ACTIVITY = '1' AND T.ID = #ID#
+		]]>
+	</select>
+	
+	<!-- 添加公告信息序列查询 -->
+	<select id="getNoticeInfoSeq" parameterClass="linkMap"
+		resultClass="string" remapResults="true">
+		<![CDATA[
+			SELECT NOTICE_INFO_SEQ.NEXTVAL FROM DUAL
+		]]>
+	</select> 
+	
+	<insert id="insertNoticeInfo" parameterClass="linkMap">
+		<![CDATA[
+			 INSERT INTO NOTICE_INFO
+			   (ID,
+			    TITLE,
+			    CONTENT,
+			    ORDERNO,
+			    CPNY_ID,
+			    FROM_DATE,
+			    TO_DATE,
+			    ACTIVITY,
+			    FILE_NAME,
+			    FILE_URL,
+			    CREATE_DATE,
+			    CREATED_BY,
+			    COLOR_FLAG)
+			 VALUES
+			   (#NOTICE_NO:VARCHAR#,
+			    #TITLE:VARCHAR#,
+			    #CONTENT:VARCHAR#,
+			    #ORDERNO:VARCHAR#,
+			    #CPNY_ID:VARCHAR#,
+			    TO_DATE(#FROM_DATE:VARCHAR#, 'DD/MM/YYYY'),
+   				TO_DATE(#TO_DATE:VARCHAR#, 'DD/MM/YYYY'),
+			    1,
+			    #FILE_NAME:VARCHAR#,
+			    #FILE_URL:VARCHAR#,
+			    SYSDATE,
+			    #CREATE_BY:VARCHAR#,
+			    #COLOR_FLAG:VARCHAR#)
+		]]>
+	</insert>
+	<update id="updateNoticeInfo" parameterClass="linkMap">
+		<![CDATA[
+			UPDATE NOTICE_INFO T
+			   SET T.TITLE     = #TITLE#,
+			   	   T.CONTENT     = #CONTENT#,
+			       T.FROM_DATE   = TO_DATE(#FROM_DATE#, 'DD/MM/YYYY'),
+			       T.TO_DATE     = TO_DATE(#TO_DATE#, 'DD/MM/YYYY'),
+			       FILE_NAME	 = #fileName:VARCHAR#,
+			       FILE_URL		 =  #fileUrl:VARCHAR#,
+			       T.CPNY_ID     = #CPNY_ID#,
+			       T.UPDATE_DATE = SYSDATE,
+			       T.UPDATED_BY  = #adminID#
+			 WHERE T.ID = #ID#
+				
+		]]>
+	</update>
+	<delete id="delNoticeInfo" parameterClass="linkMap">
+		<![CDATA[
+			DELETE FROM  NOTICE_INFO T WHERE T.ID = #ID#
+		]]>
+	</delete>
+	<delete id="delOverNoticeInfo" parameterClass="linkMap">
+		<![CDATA[
+			DELETE FROM NOTICE_INFO T
+			 WHERE SYSDATE > ADD_MONTHS(T.TO_DATE, CEIL(T.PERIOD * 12))
+			  AND T.CPNY_ID = #interCpnyID#
+		]]>
+	</delete>
+	
+	<select id="getSendSMSList" parameterClass="linkMap"
+		resultClass="linkMap" remapResults="true">
+		<![CDATA[
+			  SELECT TO_CHAR(S.INPUT_TIME_STAMP, 'DD-MM-YYYY HH24:MI:SS') SEND_TIME,
+                 S.PHONE_NUMBER,
+                 S.MESSAGE,
+                 S.RESULT,
+                 S.SMS_ID
+            FROM SENDSMS S
+           WHERE 1 = 1
+		]]>
+		<isNotEmpty prepend="AND" property="END_DATE">
+			TO_CHAR(TO_DATE(#END_DATE:VARCHAR#,'DD.MM.YYYY'),'YYYY-MM-DD') >= TO_CHAR(S.INPUT_TIME_STAMP,'YYYY-MM-DD')
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="START_DATE">
+			TO_CHAR(S.INPUT_TIME_STAMP,'YYYY-MM-DD') >= TO_CHAR(TO_DATE(#START_DATE:VARCHAR#,'DD.MM.YYYY'),'YYYY-MM-DD')
+		</isNotEmpty>
+		<![CDATA[
+			ORDER BY S.INPUT_TIME_STAMP DESC
+		]]>
+	</select>
+	
+	<select id="getSendSMSCnt" parameterClass="linkMap"
+		resultClass="int">
+		<![CDATA[
+			 SELECT COUNT(S.INPUT_TIME_STAMP) 
+            FROM   SENDSMS S
+           WHERE 1 = 1
+		]]>
+		<isNotEmpty prepend="AND" property="END_DATE">
+			TO_CHAR(TO_DATE(#END_DATE:VARCHAR#,'DD.MM.YYYY'),'YYYY-MM-DD') >= TO_CHAR(S.INPUT_TIME_STAMP,'YYYY-MM-DD')
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="START_DATE">
+			TO_CHAR(S.INPUT_TIME_STAMP,'YYYY-MM-DD') >= TO_CHAR(TO_DATE(#START_DATE:VARCHAR#,'DD.MM.YYYY'),'YYYY-MM-DD')
+		</isNotEmpty>
+	</select>
+	
+	<insert id="insertSendSMSInfo" parameterClass="linkMap">
+		<![CDATA[
+				INSERT INTO SENDSMS (
+				    SMS_ID,
+				    INPUT_TIME_STAMP,
+				    PHONE_NUMBER,
+				    MESSAGE,
+				    RESULT
+				)VALUES(
+				    SENDSMS_SEQ.NEXTVAL,
+				    #FROM_DATE:VARCHAR#,
+				    #PHONE_NUMBER:VARCHAR#,
+				    #MESSAGE:VARCHAR#,
+				    0
+				)
+		]]>
+	</insert>
+	
+	<insert id="addViewVideoCount" parameterClass="linkMap">
+		<![CDATA[
+				INSERT INTO SY_VIDEO_VIEW (
+				    video_seq,
+				    person_id,
+				    view_ip,
+				    view_date
+				)VALUES(
+				    SY_VIDEO_VIEW_SEQ.NEXTVAL,
+				    #adminID:VARCHAR#,
+				    #adminIP:VARCHAR#,
+				    sysdate
+				)
+		]]>
+	</insert>
+	
+	<insert id="insertFeedback" parameterClass="linkMap">
+		<![CDATA[
+				INSERT INTO SY_FEEDBACK (
+				    FEEDBACK_ID,
+				    FEEDBACK_TYPE,
+				    FEEDBACK_TITLE,
+				    FEEDBACK_CONTENT,
+				    ACTIVITY,
+				    CREATE_DATE,
+				    CREATED_IP,
+				    CREATED_BY
+				)VALUES(
+				    TO_CHAR(SY_FEEDBACK_SEQ.NEXTVAL),
+				    #FEEDBACK_TYPE:VARCHAR#,
+				    #TITLE:VARCHAR#,
+				    #CONTENT:VARCHAR#,
+				    1,
+				    sysdate,
+				    #adminIP:VARCHAR#,
+				    #adminID:VARCHAR#
+				)
+		]]>
+	</insert>
+
+	<select id="getFeedbackList" parameterClass="linkMap" resultClass="linkMap">
+		<![CDATA[
+				SELECT T.FEEDBACK_ID,
+				       T.FEEDBACK_TITLE TITLE,
+				       T.FEEDBACK_TYPE,
+				       GET_GLOBAL_NAME(T.FEEDBACK_TYPE, #language:VARCHAR#) FEEDBACK_TYPE_NAME,
+				       T.FEEDBACK_CONTENT CONTENT,
+				       TO_CHAR(T.CREATE_DATE,'DD/MM/YYYY HH24:MI') CREATE_DATE,
+				       T.CREATED_BY,
+				       H.LOCAL_NAME CREATED_NAME
+				  FROM SY_FEEDBACK T, HR_EMPLOYEE H
+				 WHERE T.ACTIVITY = '1'
+				   AND T.CREATED_BY = H.PERSON_ID
+		]]>
+		<isNotEmpty prepend="AND" property="TITLE">
+			<![CDATA[
+				upper(T.FEEDBACK_TITLE) like upper('%$TITLE$%')
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="FEEDBACK_TYPE">
+			<![CDATA[
+				T.FEEDBACK_TYPE = #FEEDBACK_TYPE#
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="FROM_DATE">
+			<![CDATA[
+				T.CREATE_DATE >= TO_DATE(#FROM_DATE:VARCHAR#,'DD/MM/YYYY')
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="TO_DATE">
+			<![CDATA[
+				T.CREATE_DATE < TO_DATE(#TO_DATE:VARCHAR#,'DD/MM/YYYY') + 1
+			]]>
+		</isNotEmpty>
+		<![CDATA[
+			ORDER BY T.CREATE_DATE DESC
+		]]>
+	</select>
+
+	<select id="getFeedbackListCn" parameterClass="linkMap" resultClass="int">
+		<![CDATA[
+				SELECT COUNT(*)
+				  FROM SY_FEEDBACK T, HR_EMPLOYEE H
+				 WHERE T.ACTIVITY = '1'
+				   AND T.CREATED_BY = H.PERSON_ID
+		]]>
+		<isNotEmpty prepend="AND" property="TITLE">
+			<![CDATA[
+				upper(T.FEEDBACK_TITLE) like upper('%$TITLE$%')
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="FEEDBACK_TYPE">
+			<![CDATA[
+				T.FEEDBACK_TYPE = #FEEDBACK_TYPE#
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="FROM_DATE">
+			<![CDATA[
+				T.CREATE_DATE >= TO_DATE(#FROM_DATE:VARCHAR#,'DD/MM/YYYY')
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="TO_DATE">
+			<![CDATA[
+				T.CREATE_DATE < TO_DATE(#TO_DATE:VARCHAR#,'DD/MM/YYYY') + 1
+			]]>
+		</isNotEmpty>
+	</select>
+
+	<select id="getFeedbackById" parameterClass="linkMap" resultClass="linkMap">
+		<![CDATA[
+				SELECT T.FEEDBACK_ID,
+				       T.FEEDBACK_TITLE TITLE,
+				       T.FEEDBACK_TYPE,
+				       GET_GLOBAL_NAME(T.FEEDBACK_TYPE, #language:VARCHAR#) FEEDBACK_TYPE_NAME,
+				       T.FEEDBACK_CONTENT CONTENT,
+				       TO_CHAR(T.CREATE_DATE,'DD/MM/YYYY HH24:MI') CREATE_DATE,
+				       T.CREATED_BY,
+				       H.LOCAL_NAME CREATED_NAME
+				  FROM SY_FEEDBACK T, HR_EMPLOYEE H
+				 WHERE T.CREATED_BY = H.PERSON_ID
+				   AND T.FEEDBACK_ID = #ID#
+		]]>
+	</select>
+
+	<select id="viewVideoList" parameterClass="linkMap" resultClass="linkMap" remapResults="true">
+		<![CDATA[
+			SELECT 
+             H.EMPID,
+             H.PERSON_ID,
+             H.LOCAL_NAME,
+             H.CHINESE_PINYIN,
+             H.ENGLISH_NAME,
+             TO_CHAR(S.VIEW_DATE, 'DD/MM/YYYY HH24:MI') VIEW_DATE,
+             get_dept_name(H.DEPTNO,#language:VARCHAR#) DEPARTMENT_NAME,
+             GET_GLOBAL_NAME(H.POST_GRADE_NO, #language:VARCHAR#) POST_GRADE_NAME,
+             NVL(GET_CODE_NAME(H.EMP_TYPE_CODE, #language:VARCHAR#),' ') EMP_TYPE_NAME
+        FROM HR_EMPLOYEE        H,
+             SY_VIDEO_VIEW   S
+       WHERE S.PERSON_ID = H.PERSON_ID
+         AND H.PERSON_ID NOT LIKE '1111111%'
+		]]>
+		<isNotEmpty prepend="AND" property="KEY">
+			( 
+				UPPER(H.EMPID) LIKE UPPER('%'||#KEY#||'%') 
+			OR	UPPER(H.LOCAL_NAME) LIKE UPPER('%'||#KEY#||'%')
+			OR	UPPER(H.ENGLISH_NAME) LIKE UPPER('%'||#KEY#||'%')
+			)
+		</isNotEmpty>	
+		<isNotEmpty prepend="AND" property="MONTH">
+			<![CDATA[
+		   		TO_CHAR(S.VIEW_DATE, 'MM') = #MONTH:VARCHAR#
+             ]]>
+		</isNotEmpty>
+		<![CDATA[
+		 
+			 ORDER BY S.VIEW_DATE ASC
+		]]>
+	</select>
+	
+</sqlMap>

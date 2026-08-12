@@ -1,0 +1,6 @@
+# SVN metadata (legacy VCS, not needed)
+.svn/
+
+# Runtime-generated / temporary data (not source)
+WebRoot/resources/temp/
+WebRoot/resources/reportFile/
