@@ -643,7 +643,30 @@ public class InfoApplyLeaveSerImpl implements InfoApplyLeaveSer {
 		}
 		return paramMap;
 	}
-	
+
+	/**
+	 * 从列表中直接收集每项指定字段(如APPLY_NO/PK_NO)的值，逗号分隔
+	 * 用于批量审批/编辑既有申请的场景，此时申请编号本身就是入参数据的一部分
+	 * 同步邮件时只同步这些申请，避免把其他历史待发送数据一并同步
+	 */
+	@SuppressWarnings("unchecked")
+	private String collectValuesDirect(List list, String key){
+		StringBuffer values = new StringBuffer();
+		if(list != null){
+			for(int i=0;i<list.size();i++){
+				Map itemMap = (Map) list.get(i);
+				Object value = itemMap == null ? null : itemMap.get(key);
+				if(value != null && value.toString().length() > 0){
+					if(values.length() > 0){
+						values.append(",");
+					}
+					values.append(value.toString());
+				}
+			}
+		}
+		return values.toString();
+	}
+
 	/**
 	 * 休假申请决裁信息总数(get Leave Affirm Info List Cnt)
 	 * 
@@ -1378,6 +1401,7 @@ public class InfoApplyLeaveSerImpl implements InfoApplyLeaveSer {
 		paramMap.put("attendanceApplyInfoList", attendanceApplyInfoList);
 		paramMap.put("paramMapo", paramMapo);
 		returnNum = this.infoApplyLeaveDao.saveAttApplyInfoByAnyApproverForBatch(paramMap);
+		request.setAttribute("APPLY_NOS", this.collectValuesDirect(attendanceApplyInfoList, "APPLY_NO"));
 		return returnNum;
 	}
 	
@@ -1403,6 +1427,7 @@ public class InfoApplyLeaveSerImpl implements InfoApplyLeaveSer {
 		paramMap.put("affirmList", affirmList);		
 		paramMap.put("paramMapo", paramMapo);
 		returnNum = this.infoApplyLeaveDao.saveAttendanceApplyInfoForBatchHAE(paramMap);
+		request.setAttribute("APPLY_NOS", this.collectValuesDirect(attendanceApplyInfoList, "APPLY_NO"));
 		if(returnNum == 1){
 			this.infoApplyLeaveDao.delAttendanceExForBatchInfoListHAE(paramMapo);
 		}
@@ -1422,6 +1447,7 @@ public class InfoApplyLeaveSerImpl implements InfoApplyLeaveSer {
 		paramMap.put("attendanceApplyExInfoList", attendanceApplyExInfoList);
 		paramMap.put("paramMapo", paramMapo);
 		this.infoApplyLeaveDao.saveAttenanceExBatchInfo(paramMap);
+		request.setAttribute("APPLY_NOS", this.collectValuesDirect(attendanceApplyExInfoList, "PK_NO"));
 		return 1;
 	}
 	
@@ -6448,7 +6474,8 @@ public class InfoApplyLeaveSerImpl implements InfoApplyLeaveSer {
 		
 		LinkedHashMap leaveMap = this.preAddApplyLeaveSST(paramMap);
 		this.infoApplyLeaveDao.addLeaveApplySST(leaveMap);
-		
+		request.setAttribute("APPLY_NOS", paramMap.get("APPLY_NO"));
+
 		return 1;
 	}
 	

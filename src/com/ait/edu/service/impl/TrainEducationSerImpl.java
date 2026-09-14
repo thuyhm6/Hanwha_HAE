@@ -2635,7 +2635,10 @@ public class TrainEducationSerImpl implements TrainEducationSer {
 		returnMap.put("personMap", personMap);
         paramMap.put("admin", admin);
         this.eduTrainDao.addRegisterForTraining(returnMap);
-        
+        //只同步本次刚创建的申请，避免把其他历史待发送数据一并同步
+        Object applyNo = paramMap.get("APPLY_NO");
+        request.setAttribute("APPLY_NOS", applyNo == null ? "" : applyNo.toString());
+
         return 1;
 	}
 	

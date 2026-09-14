@@ -656,6 +656,7 @@ public class InfoApplyDaoImpl extends SqlMapClientSupport implements InfoApplyDa
 				LinkedHashMap tempMap = new LinkedHashMap();
 				int essApplySeq = getEssApplySeq();
 				obj.put("APPLY_NO_SEQ", essApplySeq);
+				obj.put("APPLY_NO", essApplySeq);
 				obj.put("OT_FROM_TIME", obj.get("FROM_TIME"));
 				obj.put("OT_TO_TIME", obj.get("TO_TIME"));
 				obj.put("CREATED_IP", ((LinkedHashMap) obj).get("CREATED_IP"));
@@ -4096,6 +4097,7 @@ public class InfoApplyDaoImpl extends SqlMapClientSupport implements InfoApplyDa
 				
 				int essApplySeq = getEssApplySeq();
 				obj.put("APPLY_NO_SEQ", essApplySeq);
+				obj.put("APPLY_NO", essApplySeq);
                 //修改申请表
 				this.insert("ess.infoApply.insertOvertimeApplySST", obj);
 				/*//修改明细表
@@ -4142,6 +4144,7 @@ public class InfoApplyDaoImpl extends SqlMapClientSupport implements InfoApplyDa
 				
 				int essApplySeq = getEssApplySeq();
 				obj.put("APPLY_NO_SEQ", essApplySeq);
+				obj.put("APPLY_NO", essApplySeq);
                 //修改申请表
 				this.insert("ess.infoApply.insertOtOverApply", obj);
 				/*//修改明细表

@@ -1446,7 +1446,9 @@ public class InfoApplyCtroller {
 			map.put("statusCode", "300");
 		}
 		try{
-			mailSendApprovalManager.sendAffirmInfoEmailApproval(request);
+			//只同步本次涉及的申请，避免把其他历史待发送数据一并同步
+			Object applyNos = request.getAttribute("APPLY_NOS");
+			mailSendApprovalManager.sendAffirmInfoEmailApproval(request, applyNos == null ? null : applyNos.toString());
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -4095,7 +4097,9 @@ public class InfoApplyCtroller {
 			map.put("statusCode", "300");
 		}
 		try{
-			mailSendApprovalManager.sendAffirmInfoEmailApproval(request);
+			//只同步本次涉及的申请，避免把其他历史待发送数据一并同步
+			Object applyNos = request.getAttribute("APPLY_NOS");
+			mailSendApprovalManager.sendAffirmInfoEmailApproval(request, applyNos == null ? null : applyNos.toString());
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -4772,7 +4776,9 @@ public class InfoApplyCtroller {
 			map.put("statusCode", "300");
 		}
 		try{
-			mailSendApprovalManager.sendAffirmInfoEmailApproval(request);
+			//只同步本次涉及的申请，避免把其他历史待发送数据一并同步
+			Object applyNos = request.getAttribute("APPLY_NOS");
+			mailSendApprovalManager.sendAffirmInfoEmailApproval(request, applyNos == null ? null : applyNos.toString());
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -4799,7 +4805,9 @@ public class InfoApplyCtroller {
 			map.put("statusCode", "300");
 		}
 		try{
-			mailSendApprovalManager.sendAffirmInfoEmailApproval(request);
+			//只同步本次涉及的申请，避免把其他历史待发送数据一并同步
+			Object applyNos = request.getAttribute("APPLY_NOS");
+			mailSendApprovalManager.sendAffirmInfoEmailApproval(request, applyNos == null ? null : applyNos.toString());
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -5255,7 +5263,9 @@ public class InfoApplyCtroller {
 		}
 		try{
 			mailSendApprovalManager.cancelMailApprovaledInfo(request,"only");
-			mailSendApprovalManager.sendAffirmInfoEmailApproval(request);
+			//只同步本次审批涉及的申请，避免把其他历史待发送数据一并同步
+			Object applyNos = request.getAttribute("APPLY_NOS");
+			mailSendApprovalManager.sendAffirmInfoEmailApproval(request, applyNos == null ? null : applyNos.toString());
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -5318,7 +5328,9 @@ public class InfoApplyCtroller {
 		}
 		try{
 			mailSendApprovalManager.cancelMailApprovaledInfo(request,"single");
-			mailSendApprovalManager.sendAffirmInfoEmailApproval(request);
+			//只同步本次审批涉及的申请，避免把其他历史待发送数据一并同步
+			Object applyNos = request.getAttribute("APPLY_NOS");
+			mailSendApprovalManager.sendAffirmInfoEmailApproval(request, applyNos == null ? null : applyNos.toString());
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -5356,7 +5368,9 @@ public class InfoApplyCtroller {
 		}
 		try{
 			mailSendApprovalManager.cancelMailApprovaledInfo(request,"single");
-			mailSendApprovalManager.sendAffirmInfoEmailApproval(request);
+			//只同步本次审批涉及的申请，避免把其他历史待发送数据一并同步
+			Object applyNos = request.getAttribute("APPLY_NOS");
+			mailSendApprovalManager.sendAffirmInfoEmailApproval(request, applyNos == null ? null : applyNos.toString());
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -5394,7 +5408,9 @@ public class InfoApplyCtroller {
 		}
 		try{
 			mailSendApprovalManager.cancelMailApprovaledInfo(request,"batch");
-			mailSendApprovalManager.sendAffirmInfoEmailApproval(request);
+			//只同步本次审批涉及的申请，避免把其他历史待发送数据一并同步
+			Object applyNos = request.getAttribute("APPLY_NOS");
+			mailSendApprovalManager.sendAffirmInfoEmailApproval(request, applyNos == null ? null : applyNos.toString());
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -5784,7 +5800,9 @@ public class InfoApplyCtroller {
 			map.put("statusCode", "300");
 		}
 		try{
-			mailSendApprovalManager.sendAffirmInfoEmailApproval(request);
+			//只同步本次涉及的申请，避免把其他历史待发送数据一并同步
+			Object applyNos = request.getAttribute("APPLY_NOS");
+			mailSendApprovalManager.sendAffirmInfoEmailApproval(request, applyNos == null ? null : applyNos.toString());
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -5818,7 +5836,9 @@ public class InfoApplyCtroller {
 			map.put("statusCode", "300");
 		}
 		try{
-			mailSendApprovalManager.sendAffirmInfoEmailApproval(request);
+			//只同步本次涉及的申请，避免把其他历史待发送数据一并同步
+			Object applyNos = request.getAttribute("APPLY_NOS");
+			mailSendApprovalManager.sendAffirmInfoEmailApproval(request, applyNos == null ? null : applyNos.toString());
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -5852,7 +5872,9 @@ public class InfoApplyCtroller {
 			map.put("statusCode", "300");
 		}
 		try{
-			mailSendApprovalManager.sendAffirmInfoEmailApproval(request);
+			//只同步本次涉及的申请，避免把其他历史待发送数据一并同步
+			Object applyNos = request.getAttribute("APPLY_NOS");
+			mailSendApprovalManager.sendAffirmInfoEmailApproval(request, applyNos == null ? null : applyNos.toString());
 		}catch(Exception e){
 			e.printStackTrace();
 		}

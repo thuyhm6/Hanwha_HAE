@@ -199,8 +199,15 @@
 			 WHERE A.PERSON_ID = HR.PERSON_ID
 			   AND A.PERSON_ID NOT LIKE '111111%'
 			   AND HR.CPNY_ID = #interCpnyID:VARCHAR#
+		]]>
+		<isNotEmpty prepend="AND" property="APPLY_NOS_FILTER">
+			<![CDATA[
+				A.APPLY_NO IN ($APPLY_NOS_FILTER$)
+			]]>
+		</isNotEmpty>
+		<![CDATA[
 			 ORDER BY A.ORDER_TIME) APPLY_DATA
-		]]>	  
+		]]>
 	</select>
 	
 	<select id="getAffirmListByApplyNo" parameterClass="linkMap" resultClass="linkMap" remapResults="true">

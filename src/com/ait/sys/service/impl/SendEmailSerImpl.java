@@ -683,6 +683,15 @@ public class SendEmailSerImpl implements SendEmailSer{
 	 * HAE待审批发送到eagleoffice审批箱
 	 */
 	public List getAffirmInfoEmailApproval(HttpServletRequest request){
+		return this.getAffirmInfoEmailApproval(request, null);
+	}
+
+	/**
+	 * HAE待审批发送到eagleoffice审批箱
+	 * @param applyNos 只同步这些申请编号(逗号分隔)的数据；为空时同步所有待发送数据（保留原有全量同步行为）
+	 */
+	@SuppressWarnings("unchecked")
+	public List getAffirmInfoEmailApproval(HttpServletRequest request, String applyNos){
 		/*获得web service服务*/
 		NeoOrgWsProxy neoOrgWsProxy = mailSendApprovalManager.getNeoOrgWsProxy();
 		List applyList = new ArrayList();
@@ -692,7 +701,11 @@ public class SendEmailSerImpl implements SendEmailSer{
 				return applyList;
 			}
 			LinkedHashMap paramMap = ObjectBindUtil.getRequestParamData(request);
-			
+			//APPLY_NO均为内部序列号(数字)，此处校验后直接拼接进IN条件，避免SQL注入
+			if(StringUtil.checkNull(applyNos).matches("[0-9]+(,[0-9]+)*")){
+				paramMap.put("APPLY_NOS_FILTER", applyNos);
+			}
+
 			//读取模板信息
 			String basePath = request.getSession().getServletContext().getRealPath("/");
 			String template = MailManager.readTemplate("approvalInfo");

@@ -95,9 +95,20 @@ public class MailSendApprovalManager {
 	 */
 	@SuppressWarnings("unchecked")
 	public boolean sendAffirmInfoEmailApproval(HttpServletRequest request){
+		return this.sendAffirmInfoEmailApproval(request, null);
+	}
+
+	/**
+	 * 获取需要发送待审批信息的审批者，发送到eagleoffice
+	 * @param request
+	 * @param applyNos 只同步这些申请编号(逗号分隔)的数据；为空时同步所有待发送数据（保留原有全量同步行为）
+	 * @return boolean
+	 */
+	@SuppressWarnings("unchecked")
+	public boolean sendAffirmInfoEmailApproval(HttpServletRequest request, String applyNos){
 		boolean resultBool = false;
 		if("1".equals(APPROVAL_SEND_FLAG)){
-			List sendList = sendEmailSer.getAffirmInfoEmailApproval(request);
+			List sendList = sendEmailSer.getAffirmInfoEmailApproval(request, applyNos);
 			if(sendList != null){
 				for(int i=0;i<sendList.size();i++){
 					Map approvalMap = (Map) sendList.get(i);

@@ -685,6 +685,18 @@ public class AnnualadjustmentInfoSerImpl  implements AnnualadjustmentInfoSer {
 			
 			if(bool){
 				annualadjustmentInfoDao.addBatchCwaAbnormalApplyBatch(batchOtApplyList);
+				//收集本次涉及的申请编号(存入ESS_CARD_APPLY_TB.APPLY_NO的即为PK_NO)，同步邮件时只同步这些申请
+				StringBuffer applyNos = new StringBuffer();
+				for(int j=0;j<arDetailInfoList.size();j++){
+					Object pkNo = arDetailInfoList.get(j).get("PK_NO");
+					if(pkNo != null && pkNo.toString().length() > 0){
+						if(applyNos.length() > 0){
+							applyNos.append(",");
+						}
+						applyNos.append(pkNo.toString());
+					}
+				}
+				request.setAttribute("APPLY_NOS", applyNos.toString());
 			}
 			
 			return num;

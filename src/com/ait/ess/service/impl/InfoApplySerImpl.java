@@ -357,7 +357,52 @@ public class InfoApplySerImpl implements InfoApplySer {
 		}
 		return paramMap;
 	}
-	
+
+	/**
+	 * 从批量插入用的列表(每项含PARAM_MAP)中收集本次实际生成/涉及的APPLY_NO，逗号分隔
+	 * 用于同步邮件时只同步本次的申请，避免把其他历史待发送数据一并同步
+	 */
+	@SuppressWarnings("unchecked")
+	private String collectApplyNos(List batchList){
+		StringBuffer applyNos = new StringBuffer();
+		if(batchList != null){
+			for(int i=0;i<batchList.size();i++){
+				Map itemMap = (Map) batchList.get(i);
+				Object obj = itemMap == null ? null : itemMap.get("PARAM_MAP");
+				Object applyNo = obj == null ? null : ((Map)obj).get("APPLY_NO");
+				if(applyNo != null && applyNo.toString().length() > 0){
+					if(applyNos.length() > 0){
+						applyNos.append(",");
+					}
+					applyNos.append(applyNo.toString());
+				}
+			}
+		}
+		return applyNos.toString();
+	}
+
+	/**
+	 * 从列表中直接收集每项的APPLY_NO(不经过PARAM_MAP包装)，逗号分隔
+	 * 用于批量审批/编辑既有申请的场景(如saveOtApplyAffirmForBatch)，此时APPLY_NO本身就是入参数据的一部分
+	 */
+	@SuppressWarnings("unchecked")
+	private String collectApplyNosDirect(List list){
+		StringBuffer applyNos = new StringBuffer();
+		if(list != null){
+			for(int i=0;i<list.size();i++){
+				Map itemMap = (Map) list.get(i);
+				Object applyNo = itemMap == null ? null : itemMap.get("APPLY_NO");
+				if(applyNo != null && applyNo.toString().length() > 0){
+					if(applyNos.length() > 0){
+						applyNos.append(",");
+					}
+					applyNos.append(applyNo.toString());
+				}
+			}
+		}
+		return applyNos.toString();
+	}
+
 	/**
 	 * 加班申请决裁信息总数(search ot info list count)
 	 * 
@@ -893,7 +938,8 @@ public class InfoApplySerImpl implements InfoApplySer {
 		batchOtApplyList.add(otMap);
 		
 		this.infoApplyDao.addOvertimeApplyInBatch(batchOtApplyList);
-		
+		request.setAttribute("APPLY_NOS", this.collectApplyNos(batchOtApplyList));
+
 		if(affirmFlag.equals("-1")){
 			return 12;
 		}
@@ -6598,7 +6644,8 @@ public class InfoApplySerImpl implements InfoApplySer {
 		batchOtApplyList.add(otMap);
 		
 		this.infoApplyDao.addOvertimeApplySST(batchOtApplyList);
-		
+		request.setAttribute("APPLY_NOS", this.collectApplyNos(batchOtApplyList));
+
 		return 1;
 	}
 	
@@ -6622,7 +6669,8 @@ public class InfoApplySerImpl implements InfoApplySer {
 		batchOtApplyList.add(otMap);
 		
 		this.infoApplyDao.addOtOverApply(batchOtApplyList);
-		
+		request.setAttribute("APPLY_NOS", this.collectApplyNos(batchOtApplyList));
+
 		return 1;
 	}
 
@@ -6857,6 +6905,11 @@ public class InfoApplySerImpl implements InfoApplySer {
 		if(paramMap.get("DEDUCT_YN_OLD")!=null && paramMap.get("DEDUCT_YN_NEW")!= null && !paramMap.get("DEDUCT_YN_OLD").equals(paramMap.get("DEDUCT_YN_NEW"))){
 			this.infoApplyDao.updateDeductYn(paramMap);
 		}
+		//记录本次审批涉及的申请编号，同步邮件时只同步该申请
+		Object applyNo = paramMap.get("APPLY_NO");
+		if(applyNo != null){
+			request.setAttribute("APPLY_NOS", applyNo.toString());
+		}
 		try {
 			return this.infoApplyDao.executePro(paramMap,target);
 		} catch (Exception e) {
@@ -6885,15 +6938,25 @@ public class InfoApplySerImpl implements InfoApplySer {
 		try {
 			String jsonString = request.getParameter("jsonData") ;
 			List<LinkedHashMap<String, Object>> dataList = ObjectBindUtil.getRequestJsonData(jsonString) ;
+			StringBuffer applyNos = new StringBuffer();
 			for(int i = 0;i<dataList.size();i++){
 				Map paramMap = (Map) dataList.get(i);
-				
+
 				if(paramMap.get("DEDUCT_YN_OLD")!=null && paramMap.get("DEDUCT_YN_NEW")!= null && !paramMap.get("DEDUCT_YN_OLD").equals(paramMap.get("DEDUCT_YN_NEW"))){
 					this.infoApplyDao.updateDeductYn(paramMap);
 				}
-				
+
 				result = this.infoApplyDao.executePro(paramMap,target);
+				Object applyNo = paramMap.get("APPLY_NO");
+				if(applyNo != null){
+					if(applyNos.length() > 0){
+						applyNos.append(",");
+					}
+					applyNos.append(applyNo.toString());
+				}
 			}
+			//记录本次审批涉及的申请编号，同步邮件时只同步这些申请
+			request.setAttribute("APPLY_NOS", applyNos.toString());
 		} catch (Exception e) {
 			e.printStackTrace();
 			return e.getMessage();
@@ -6907,6 +6970,7 @@ public class InfoApplySerImpl implements InfoApplySer {
 		try {
 			String jsonString = request.getParameter("jsonData") ;
 			List<LinkedHashMap<String, Object>> dataList = ObjectBindUtil.getRequestJsonData(jsonString) ;
+			StringBuffer applyNos = new StringBuffer();
 			for(int i = 0;i<dataList.size();i++){
 				Map paramMap = (Map) dataList.get(i);
 				List infoList = infoApplyDao.viewApprovalInfo(paramMap, "getBatchLeaveAffirmInfoList");
@@ -6918,9 +6982,18 @@ public class InfoApplySerImpl implements InfoApplySer {
 						infoParamMap.put("adminIP", paramMap.get("adminIP"));
 						infoParamMap.put("interCpnyID", paramMap.get("interCpnyID"));
 						result = this.infoApplyDao.executePro(infoParamMap,target);
+						Object applyNo = infoParamMap.get("APPLY_NO");
+						if(applyNo != null){
+							if(applyNos.length() > 0){
+								applyNos.append(",");
+							}
+							applyNos.append(applyNo.toString());
+						}
 					}
 				}
 			}
+			//记录本次审批涉及的申请编号，同步邮件时只同步这些申请
+			request.setAttribute("APPLY_NOS", applyNos.toString());
 		} catch (Exception e) {
 			e.printStackTrace();
 			return e.getMessage();
@@ -7194,6 +7267,7 @@ public class InfoApplySerImpl implements InfoApplySer {
 		paramMap.put("otApplyAffirmList", otApplyAffirmList);
 		paramMap.put("paramMapo", paramMapo);
 		returnNum = this.infoApplyDao.saveOtApplyAffirmForBatch(paramMap);
+		request.setAttribute("APPLY_NOS", this.collectApplyNosDirect(otApplyAffirmList));
 		return returnNum;
 	}
 	
@@ -7216,6 +7290,7 @@ public class InfoApplySerImpl implements InfoApplySer {
 		paramMap.put("otApplyAffirmList", otApplyAffirmList);
 		paramMap.put("paramMapo", paramMapo);
 		returnNum = this.infoApplyDao.saveOtApplyByAnyApproverForBatch(paramMap);
+		request.setAttribute("APPLY_NOS", this.collectApplyNosDirect(otApplyAffirmList));
 		return returnNum;
 	}
 	
@@ -7238,6 +7313,7 @@ public class InfoApplySerImpl implements InfoApplySer {
 		paramMap.put("otApplyAffirmList", otApplyAffirmList);
 		paramMap.put("paramMapo", paramMapo);
 		returnNum = this.infoApplyDao.saveOTApplyInfoForBatchHAE(paramMap);
+		request.setAttribute("APPLY_NOS", this.collectApplyNosDirect(otApplyAffirmList));
 		return returnNum;
 	}
 	

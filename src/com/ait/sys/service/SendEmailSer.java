@@ -28,7 +28,13 @@ public interface SendEmailSer {
 	
 	@SuppressWarnings("unchecked")
 	public List getAffirmInfoEmailApproval(HttpServletRequest request);
-	
+
+	/**
+	 * 只获取指定申请编号(APPLY_NO，多个用逗号分隔)的待发送审批信息，避免把其他历史待发送数据一并同步
+	 */
+	@SuppressWarnings("unchecked")
+	public List getAffirmInfoEmailApproval(HttpServletRequest request, String applyNos);
+
 	/**
 	 * 获取需要在eagleoffice里面取消申请的信息
 	 */

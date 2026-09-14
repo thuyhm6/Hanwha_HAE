@@ -2545,7 +2545,9 @@ public class InfoApplyLeaveCtroller {
 			map.put("statusCode", "300");
 		}
 		try{
-			mailSendApprovalManager.sendAffirmInfoEmailApproval(request);
+			//只同步本次刚创建的申请，避免把其他历史待发送数据一并同步
+			Object applyNos = request.getAttribute("APPLY_NOS");
+			mailSendApprovalManager.sendAffirmInfoEmailApproval(request, applyNos == null ? null : applyNos.toString());
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -2573,13 +2575,15 @@ public class InfoApplyLeaveCtroller {
 			map.put("statusCode", "300");
 		}
 		try{
-			mailSendApprovalManager.sendAffirmInfoEmailApproval(request);
+			//只同步本次刚创建的申请，避免把其他历史待发送数据一并同步
+			Object applyNos = request.getAttribute("APPLY_NOS");
+			mailSendApprovalManager.sendAffirmInfoEmailApproval(request, applyNos == null ? null : applyNos.toString());
 		}catch(Exception e){
 			e.printStackTrace();
 		}
 		return map;
 	}
-	
+
 	/**
 	 * 天津年假信息申请
 	 * 

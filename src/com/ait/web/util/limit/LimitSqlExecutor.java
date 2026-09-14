@@ -52,49 +52,69 @@ public class LimitSqlExecutor extends SqlExecutor {
 			skipResults = NO_SKIPPED_RESULTS;
 			maxResults = NO_MAXIMUM_RESULTS;
 		}
-		logSql(request, sql, parameters);
-		super.executeQuery(request, conn, sql, parameters, skipResults, maxResults, callback);
+		long start = System.currentTimeMillis();
+		try {
+			super.executeQuery(request, conn, sql, parameters, skipResults, maxResults, callback);
+		} finally {
+			logSql(request, sql, parameters, System.currentTimeMillis() - start);
+		}
 	}
 
 	@Override
 	public int executeUpdate(StatementScope request, Connection conn, String sql, Object[] parameters)
 			throws SQLException {
-		logSql(request, sql, parameters);
-		return super.executeUpdate(request, conn, sql, parameters);
+		long start = System.currentTimeMillis();
+		try {
+			return super.executeUpdate(request, conn, sql, parameters);
+		} finally {
+			logSql(request, sql, parameters, System.currentTimeMillis() - start);
+		}
 	}
 
 	@Override
 	public void addBatch(StatementScope request, Connection conn, String sql, Object[] parameters)
 			throws SQLException {
-		logSql(request, sql, parameters);
-		super.addBatch(request, conn, sql, parameters);
+		long start = System.currentTimeMillis();
+		try {
+			super.addBatch(request, conn, sql, parameters);
+		} finally {
+			logSql(request, sql, parameters, System.currentTimeMillis() - start);
+		}
 	}
 
 	@Override
 	public int executeUpdateProcedure(StatementScope request, Connection conn, String sql, Object[] parameters)
 			throws SQLException {
-		logSql(request, sql, parameters);
-		return super.executeUpdateProcedure(request, conn, sql, parameters);
+		long start = System.currentTimeMillis();
+		try {
+			return super.executeUpdateProcedure(request, conn, sql, parameters);
+		} finally {
+			logSql(request, sql, parameters, System.currentTimeMillis() - start);
+		}
 	}
 
 	@Override
 	public void executeQueryProcedure(StatementScope request, Connection conn, String sql, Object[] parameters,
 			int skipResults, int maxResults, RowHandlerCallback callback) throws SQLException {
-		logSql(request, sql, parameters);
-		super.executeQueryProcedure(request, conn, sql, parameters, skipResults, maxResults, callback);
+		long start = System.currentTimeMillis();
+		try {
+			super.executeQueryProcedure(request, conn, sql, parameters, skipResults, maxResults, callback);
+		} finally {
+			logSql(request, sql, parameters, System.currentTimeMillis() - start);
+		}
 	}
 
 	/**
-	 * 打印可直接执行的SQL(参数已回填到?位置),并附带对应statement的id和xml文件来源
+	 * 打印可直接执行的SQL(参数已回填到?位置),并附带对应statement的id、xml文件来源及执行耗时
 	 */
-	private void logSql(StatementScope request, String sql, Object[] parameters) {
+	private void logSql(StatementScope request, String sql, Object[] parameters, long elapsedMillis) {
 		if (!logger.isDebugEnabled()) {
 			return;
 		}
 		MappedStatement statement = request.getStatement();
 		String id = statement != null ? statement.getId() : "unknown";
 		String resource = statement != null ? statement.getResource() : "unknown";
-		logger.debug("[" + id + "] (" + resource + ") " + bindParameters(sql, parameters));
+		logger.debug("[" + id + "] (" + resource + ") [" + elapsedMillis + "ms] " + bindParameters(sql, parameters));
 	}
 
 	private String bindParameters(String sql, Object[] parameters) {
