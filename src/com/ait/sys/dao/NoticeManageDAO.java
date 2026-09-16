@@ -54,4 +54,12 @@ public interface NoticeManageDAO {
 
 	public Map getFeedbackById(Object parameterObject) throws Exception;
 
+	public List getPersonalDataConfirmList(Object parameterObject) throws Exception;
+
+	public List getPersonalDataConfirmList(Object parameterObject, int pageNum, int pageSize) throws Exception;
+
+	public int getPersonalDataConfirmListCn(Object parameterObject) throws Exception;
+
+	public Map getPersonalDataConfirmDetail(Object parameterObject) throws Exception;
+
 }

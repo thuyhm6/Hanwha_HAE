@@ -73,6 +73,8 @@ public class AdminBean implements Serializable {
 	
 	private int personalITFlag;
 
+	private String personalDataConfirmBy;
+
 	private String languagePreference = DEFAULT_LANGUAGE_PREFERENCE;
 
 	private String countryPreference = DEFAULT_COUNTRY_PREFERENCE;
@@ -394,6 +396,14 @@ public class AdminBean implements Serializable {
 	
 	public int getPersonalITFlag() {
 		return personalITFlag;
+	}
+
+	public String getPersonalDataConfirmBy() {
+		return personalDataConfirmBy;
+	}
+
+	public void setPersonalDataConfirmBy(String personalDataConfirmBy) {
+		this.personalDataConfirmBy = personalDataConfirmBy;
 	}
 
 	public int getActivity() {

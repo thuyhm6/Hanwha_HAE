@@ -335,4 +335,27 @@ public class NoticeManageDAOImpl extends SqlMapClientSupport implements NoticeMa
 	public Map getFeedbackById(Object parameterObject) throws Exception {
 		return (LinkedHashMap) this.queryForObject("sys.notice.getFeedbackById", parameterObject);
 	}
+
+	@Override
+	public List getPersonalDataConfirmList(Object parameterObject) throws Exception {
+		return this.queryForList("sys.notice.getPersonalDataConfirmList", parameterObject);
+	}
+
+	@Override
+	public List getPersonalDataConfirmList(Object parameterObject, int pageNum, int pageSize) throws Exception {
+		return this.queryForList("sys.notice.getPersonalDataConfirmList", parameterObject, pageNum, pageSize);
+	}
+
+	@Override
+	public int getPersonalDataConfirmListCn(Object parameterObject) throws Exception {
+		int count = 0;
+		count = Integer.parseInt(ObjectUtils.toString(this.queryForObject("sys.notice.getPersonalDataConfirmListCn",
+				parameterObject), "0"));
+		return count;
+	}
+
+	@Override
+	public Map getPersonalDataConfirmDetail(Object parameterObject) throws Exception {
+		return (LinkedHashMap) this.queryForObject("sys.notice.getPersonalDataConfirmDetail", parameterObject);
+	}
 }

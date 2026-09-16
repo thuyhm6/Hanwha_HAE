@@ -577,6 +577,17 @@ $(function(){
 		},"2000");
 });
 </c:if>
+
+<c:if test="${empty LoginUser.personalDataConfirmBy}">
+$(function(){
+	setTimeout(function(){
+		$.pdialog.open("/login/viewPersonalDataConfirm", "personalDataConfirm", "Phiếu đồng ý xử lý dữ liệu cá nhân", {
+			width:800, height:640, mask:true, resizable:false, drawable:false, maxable:false, minable:false,
+			close:function(){ location.href = "/login/out"; return false; }
+		});
+		},"2000");
+});
+</c:if>
 function getTips(){
 	$.ajaxSettings.global=false;
 	$.ajax({

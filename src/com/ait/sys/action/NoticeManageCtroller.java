@@ -574,4 +574,44 @@ public class NoticeManageCtroller {
 			modelMap.put("item", item);
 			return new ModelAndView("/sys/notice/viewFeedbackDetail", modelMap);
 		}
+
+		/**
+		 * Danh sách xác nhận đồng ý xử lý dữ liệu cá nhân
+		 * @param request
+		 * @param response
+		 * @param modelMap
+		 * @return
+		 * @throws Exception
+		 */
+		@SuppressWarnings("unchecked")
+		@RequestMapping(value = "/viewPersonalDataConfirmList")
+		public ModelAndView viewPersonalDataConfirmList(HttpServletRequest request,
+				HttpServletResponse response, ModelMap modelMap) throws Exception {
+			List confirmList = noticeSer.getPersonalDataConfirmList(request);
+			modelMap.put("pList", confirmList);
+			modelMap.put(UiUtil.TOTAL_COUNT_NAME, noticeSer.getPersonalDataConfirmListCn(request));
+			modelMap.put(UiUtil.PAGE_NUM_NAME, request.getParameter("pageNum") != null ? request.getParameter("pageNum") : "1");
+			modelMap.put(UiUtil.NUM_PER_PAGE_NAME, request.getParameter("numPerPage") != null ? request.getParameter("numPerPage") : "10");
+			modelMap.put("KEY", request.getParameter("seach_KEY"));
+			modelMap.put("FROM_DATE", request.getParameter("seach_FROM_DATE"));
+			modelMap.put("TO_DATE", request.getParameter("seach_TO_DATE"));
+			return new ModelAndView("/sys/notice/viewPersonalDataConfirmList", modelMap);
+		}
+
+		/**
+		 * Chi tiết xác nhận đồng ý xử lý dữ liệu cá nhân
+		 * @param request
+		 * @param response
+		 * @param modelMap
+		 * @return
+		 * @throws Exception
+		 */
+		@SuppressWarnings("unchecked")
+		@RequestMapping(value = "/viewPersonalDataConfirmDetail")
+		public ModelAndView viewPersonalDataConfirmDetail(HttpServletRequest request,
+				HttpServletResponse response, ModelMap modelMap) throws Exception {
+			Map item = noticeSer.getPersonalDataConfirmDetail(request);
+			modelMap.put("item", item);
+			return new ModelAndView("/sys/notice/viewPersonalDataConfirmDetail", modelMap);
+		}
 }

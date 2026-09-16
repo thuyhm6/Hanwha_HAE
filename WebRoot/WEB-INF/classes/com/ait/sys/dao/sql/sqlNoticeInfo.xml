@@ -364,6 +364,87 @@
 		</isNotEmpty>
 	</select>
 
+	<select id="getPersonalDataConfirmList" parameterClass="linkMap" resultClass="linkMap">
+		<![CDATA[
+				SELECT H.PERSON_ID,
+				       H.EMPID,
+				       H.LOCAL_NAME,
+				       GET_GLOBAL_NAME(H.POSITION_NO, #language:VARCHAR#) POSITION_NAME,
+				       GET_DEPT_NAME(GET_DEPT_NO_BY_LEVEL(H.DEPTNO, H.CPNY_ID, '2'), #language:VARCHAR#) TEAM,
+				       GET_DEPT_NAME(GET_DEPT_NO_BY_LEVEL(H.DEPTNO, H.CPNY_ID, '3'), #language:VARCHAR#) PART,
+				       GET_DEPT_NAME(GET_DEPT_NO_BY_LEVEL(H.DEPTNO, H.CPNY_ID, '4'), #language:VARCHAR#) CELL,
+				       TO_CHAR(SY.PERSONAL_DATA_CONFIRM_DATE,'DD/MM/YYYY HH24:MI') CONFIRM_DATE,
+				       SY.PERSONAL_DATA_CONFIRM_IP IP
+				  FROM SY_USER SY, HR_EMPLOYEE H
+				 WHERE SY.PERSON_ID = H.PERSON_ID
+				   AND H.PERSON_ID NOT LIKE '1111111%'
+				   AND SY.PERSONAL_DATA_CONFIRM_BY IS NOT NULL
+		]]>
+		<isNotEmpty prepend="AND" property="KEY">
+			<![CDATA[
+				( H.EMPID LIKE '%' || #KEY:VARCHAR# || '%'
+				  OR CONVERTTOUNSIGN(UPPER(H.LOCAL_NAME)) LIKE '%' || CONVERTTOUNSIGN(UPPER(#KEY:VARCHAR#)) || '%' )
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="FROM_DATE">
+			<![CDATA[
+				SY.PERSONAL_DATA_CONFIRM_DATE >= TO_DATE(#FROM_DATE:VARCHAR#,'DD/MM/YYYY')
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="TO_DATE">
+			<![CDATA[
+				SY.PERSONAL_DATA_CONFIRM_DATE < TO_DATE(#TO_DATE:VARCHAR#,'DD/MM/YYYY') + 1
+			]]>
+		</isNotEmpty>
+		<![CDATA[
+			ORDER BY SY.PERSONAL_DATA_CONFIRM_DATE DESC
+		]]>
+	</select>
+
+	<select id="getPersonalDataConfirmListCn" parameterClass="linkMap" resultClass="int">
+		<![CDATA[
+				SELECT COUNT(*)
+				  FROM SY_USER SY, HR_EMPLOYEE H
+				 WHERE SY.PERSON_ID = H.PERSON_ID
+				   AND H.PERSON_ID NOT LIKE '1111111%'
+				   AND SY.PERSONAL_DATA_CONFIRM_BY IS NOT NULL
+		]]>
+		<isNotEmpty prepend="AND" property="KEY">
+			<![CDATA[
+				( H.EMPID LIKE '%' || #KEY:VARCHAR# || '%'
+				  OR CONVERTTOUNSIGN(UPPER(H.LOCAL_NAME)) LIKE '%' || CONVERTTOUNSIGN(UPPER(#KEY:VARCHAR#)) || '%' )
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="FROM_DATE">
+			<![CDATA[
+				SY.PERSONAL_DATA_CONFIRM_DATE >= TO_DATE(#FROM_DATE:VARCHAR#,'DD/MM/YYYY')
+			]]>
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="TO_DATE">
+			<![CDATA[
+				SY.PERSONAL_DATA_CONFIRM_DATE < TO_DATE(#TO_DATE:VARCHAR#,'DD/MM/YYYY') + 1
+			]]>
+		</isNotEmpty>
+	</select>
+
+	<select id="getPersonalDataConfirmDetail" parameterClass="linkMap" resultClass="linkMap">
+		<![CDATA[
+				SELECT H.PERSON_ID,
+				       H.EMPID,
+				       H.LOCAL_NAME,
+				       GET_GLOBAL_NAME(H.POSITION_NO, #language:VARCHAR#) POSITION_NAME,
+				       GET_DEPT_NAME(GET_DEPT_NO_BY_LEVEL(H.DEPTNO, H.CPNY_ID, '2'), #language:VARCHAR#) TEAM,
+				       GET_DEPT_NAME(GET_DEPT_NO_BY_LEVEL(H.DEPTNO, H.CPNY_ID, '3'), #language:VARCHAR#) PART,
+				       GET_DEPT_NAME(GET_DEPT_NO_BY_LEVEL(H.DEPTNO, H.CPNY_ID, '4'), #language:VARCHAR#) CELL,
+				       TO_CHAR(SY.PERSONAL_DATA_CONFIRM_DATE,'DD/MM/YYYY HH24:MI') CONFIRM_DATE,
+				       SY.PERSONAL_DATA_CONFIRM_IP IP
+				  FROM SY_USER SY, HR_EMPLOYEE H
+				 WHERE SY.PERSON_ID = H.PERSON_ID
+				   AND H.PERSON_ID NOT LIKE '1111111%'
+				   AND H.PERSON_ID = #PERSON_ID#
+		]]>
+	</select>
+
 	<select id="getFeedbackById" parameterClass="linkMap" resultClass="linkMap">
 		<![CDATA[
 				SELECT T.FEEDBACK_ID,

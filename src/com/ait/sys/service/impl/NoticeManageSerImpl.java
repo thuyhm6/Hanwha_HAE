@@ -341,4 +341,32 @@ public class NoticeManageSerImpl implements NoticeManageSer{
 			map.put("language", map.get("interLanguage"));
 			return noticeDAO.getFeedbackById(map);
 		}
+
+		@Override
+		public List getPersonalDataConfirmList(HttpServletRequest request) throws Exception {
+			LinkedHashMap map = ObjectBindUtil.getRequestParamData(request, "seach_");
+			map.put("language", map.get("interLanguage"));
+			List confirmList;
+			if (UiUtil.getPageNum(request) > 0) {
+				confirmList = noticeDAO.getPersonalDataConfirmList(map, UiUtil.getPageNum(request), UiUtil.getNumPerPage(request));
+			} else {
+				confirmList = noticeDAO.getPersonalDataConfirmList(map);
+			}
+			return confirmList;
+		}
+
+		@Override
+		public int getPersonalDataConfirmListCn(HttpServletRequest request) throws Exception {
+			LinkedHashMap map = ObjectBindUtil.getRequestParamData(request, "seach_");
+			map.put("language", map.get("interLanguage"));
+			return noticeDAO.getPersonalDataConfirmListCn(map);
+		}
+
+		@Override
+		public Map getPersonalDataConfirmDetail(HttpServletRequest request) throws Exception {
+			Map map = ObjectBindUtil.getRequestParamData(request);
+			map.put("PERSON_ID", request.getParameter("PERSON_ID"));
+			map.put("language", map.get("interLanguage"));
+			return noticeDAO.getPersonalDataConfirmDetail(map);
+		}
 }

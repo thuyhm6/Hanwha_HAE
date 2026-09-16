@@ -560,6 +560,25 @@ public class LoginCtroller {
 	}
 
 	/**
+	 * Phiếu đồng ý xử lý dữ liệu cá nhân (Personal data processing consent popup)
+	 */
+	@RequestMapping(value = "/viewPersonalDataConfirm", method = RequestMethod.GET)
+	public ModelAndView viewPersonalDataConfirm(HttpServletRequest request,
+			ModelMap modelMap) throws Exception {
+		return new ModelAndView("/login/viewPersonalDataConfirm", modelMap);
+	}
+
+	@RequestMapping(value = "/updatePersonalDataConfirm")
+	@ResponseBody
+	public String updatePersonalDataConfirm(HttpServletRequest request,
+			HttpServletResponse response) throws Exception {
+		AdminBean admin = SessionUtil.getLoginUserFromSession(request);
+		loginStr.updateUserData(request, "updatePersonalDataConfirm");
+		admin.setPersonalDataConfirmBy(admin.getAdminID());
+		return "1";
+	}
+
+	/**
 	 * 语言切换(change Language)
 	 * 
 	 * @param request

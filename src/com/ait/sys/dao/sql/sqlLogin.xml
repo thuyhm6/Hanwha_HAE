@@ -14,6 +14,7 @@
 			       #cpny_id:VARCHAR#   AS cpnyId,
 			       get_global_name(cpny_no,'zh') cpnyName,
 			       S.SPECIAL_PARAM AS specialParam,
+			       S.PERSONAL_DATA_CONFIRM_BY as personalDataConfirmBy,
 			       HO.OPERATION_CODE_NO operationCodeNo
 			 FROM SY_USER S,
 			 	  HR_COMPANY HC,
@@ -73,6 +74,7 @@
                S.PERSONAL_DATA_FLAG as personalDataFlag,
                S.PERSONAL_LOGIN_FLAG as personalLoginFlag,
                S.PERSONAL_IT_FLAG as personalITFlag,
+               S.PERSONAL_DATA_CONFIRM_BY as personalDataConfirmBy,
                CASE WHEN HR.NATIONALITY_CODE = '872' THEN
                  '0'
                  ELSE
@@ -2413,7 +2415,17 @@
 		WHERE SY.PERSON_ID = #PERSON_ID:VARCHAR#
 	]]>
 	</update>
-	
+
+	<update id="updatePersonalDataConfirm" parameterClass="linkMap">
+	<![CDATA[
+		UPDATE SY_USER SY SET
+		SY.PERSONAL_DATA_CONFIRM_BY = #PERSON_ID:VARCHAR#,
+		SY.PERSONAL_DATA_CONFIRM_DATE = SYSDATE,
+		SY.PERSONAL_DATA_CONFIRM_IP = #ip:VARCHAR#
+		WHERE SY.PERSON_ID = #PERSON_ID:VARCHAR#
+	]]>
+	</update>
+
 	<insert id="addviewPromise" parameterClass="linkMap">
 		<![CDATA[
 			INSERT INTO SY_LOGIN_COMMIT_INFO(NO,PERSON_ID,

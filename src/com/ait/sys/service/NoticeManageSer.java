@@ -50,4 +50,10 @@ public interface NoticeManageSer {
 	public int getFeedbackListCn(HttpServletRequest request) throws Exception;
 
 	public Map getFeedbackById(HttpServletRequest request) throws Exception;
+
+	public List getPersonalDataConfirmList(HttpServletRequest request) throws Exception;
+
+	public int getPersonalDataConfirmListCn(HttpServletRequest request) throws Exception;
+
+	public Map getPersonalDataConfirmDetail(HttpServletRequest request) throws Exception;
 }
